@@ -154,9 +154,96 @@
       font-weight: 600;
       color: #333;
     }
+
+    .gate {
+      position: fixed;
+      inset: 0;
+      z-index: 2000;
+      background: rgba(0, 0, 0, 0.72);
+      display: grid;
+      place-items: center;
+      padding: 1rem;
+    }
+
+    .gate-card {
+      width: min(100%, 440px);
+      border: var(--border);
+      border-radius: var(--radius);
+      background: var(--white);
+      padding: 1rem;
+    }
+
+    .gate-card h2 {
+      margin: 0 0 0.55rem;
+      font-size: 1.1rem;
+      font-weight: 900;
+      text-transform: uppercase;
+    }
+
+    .gate-card p {
+      margin: 0 0 0.75rem;
+      font-size: 0.92rem;
+      font-weight: 600;
+    }
+
+    .gate-row {
+      display: flex;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+    }
+
+    .gate-input {
+      flex: 1 1 220px;
+      min-width: 0;
+      border: var(--border);
+      border-radius: 12px;
+      font: inherit;
+      font-size: 0.95rem;
+      padding: 0.5rem 0.6rem;
+    }
+
+    .gate-btn {
+      border: var(--border);
+      border-radius: 999px;
+      background: var(--black);
+      color: var(--white);
+      font: inherit;
+      font-size: 0.85rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+      padding: 0.48rem 0.8rem;
+      cursor: pointer;
+    }
+
+    .gate-msg {
+      margin: 0.55rem 0 0;
+      min-height: 1.2em;
+      font-size: 0.82rem;
+      font-weight: 700;
+      color: #8b0000;
+    }
+
+    .hidden {
+      display: none !important;
+    }
   </style>
 </head>
 <body>
+  <div class="gate" id="gate">
+    <section class="gate-card" aria-label="Internal access gate">
+      <h2>Internal Access</h2>
+      <p>Enter passcode to view live voting results.</p>
+      <form id="gate-form">
+        <div class="gate-row">
+          <input id="gate-input" class="gate-input" type="password" autocomplete="off" required>
+          <button type="submit" class="gate-btn">Unlock</button>
+        </div>
+        <p id="gate-msg" class="gate-msg"></p>
+      </form>
+    </section>
+  </div>
+
   <header class="top">
     <div class="wrap">
       <h1>Internal Voting Results</h1>
@@ -187,6 +274,45 @@
   </main>
 
   <script>
+    const ACCESS_KEY = "tedx_internal_results_access";
+    const PASS_HASH = "5f0217ea9b994761d28fbe51da5726c98630e0c778d28281576d4880ac22e61b";
+
+    function toHex(buffer) {
+      const bytes = new Uint8Array(buffer);
+      return Array.from(bytes).map((b) => b.toString(16).padStart(2, "0")).join("");
+    }
+
+    async function sha256(text) {
+      const enc = new TextEncoder().encode(text);
+      const digest = await crypto.subtle.digest("SHA-256", enc);
+      return toHex(digest);
+    }
+
+    function unlockGate() {
+      document.getElementById("gate").classList.add("hidden");
+      loadResults();
+      setInterval(loadResults, 15000);
+    }
+
+    async function handleGateSubmit(event) {
+      event.preventDefault();
+      const input = document.getElementById("gate-input");
+      const msg = document.getElementById("gate-msg");
+      const passcode = input.value || "";
+      const digest = await sha256(passcode);
+
+      if (digest === PASS_HASH) {
+        sessionStorage.setItem(ACCESS_KEY, "1");
+        msg.textContent = "";
+        input.value = "";
+        unlockGate();
+        return;
+      }
+
+      msg.textContent = "Incorrect passcode.";
+      input.select();
+    }
+
     async function loadResults() {
       const status = document.getElementById("status");
       status.textContent = "Loading results...";
@@ -220,8 +346,11 @@
     }
 
     document.getElementById("refresh-btn").addEventListener("click", loadResults);
-    loadResults();
-    setInterval(loadResults, 15000);
+    document.getElementById("gate-form").addEventListener("submit", handleGateSubmit);
+
+    if (sessionStorage.getItem(ACCESS_KEY) === "1") {
+      unlockGate();
+    }
   </script>
 </body>
 </html>
