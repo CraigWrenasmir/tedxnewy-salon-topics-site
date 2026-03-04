@@ -198,32 +198,27 @@
       cursor: wait;
     }
 
-    .vote-count {
-      border: 2px solid var(--black);
-      border-radius: 999px;
-      padding: 0.15rem 0.55rem;
-      font-size: 0.8rem;
-      font-weight: 700;
-      background: #f2f2f2;
-      white-space: nowrap;
-    }
-
-    .vote-summary {
-      margin: 0 0 0.9rem;
-      display: flex;
-      justify-content: flex-end;
-    }
-
-    .vote-total {
+    .vote-toast {
+      position: fixed;
+      right: 1rem;
+      bottom: 1rem;
+      z-index: 1000;
       border: var(--border-bold);
-      border-radius: 999px;
+      border-radius: 12px;
       background: var(--black);
       color: var(--white);
-      padding: 0.3rem 0.75rem;
-      font-size: 0.8rem;
-      font-weight: 800;
-      text-transform: uppercase;
-      letter-spacing: 0.03em;
+      font-size: 0.9rem;
+      font-weight: 700;
+      padding: 0.6rem 0.85rem;
+      opacity: 0;
+      transform: translateY(8px);
+      pointer-events: none;
+      transition: opacity 160ms ease, transform 160ms ease;
+    }
+
+    .vote-toast.show {
+      opacity: 1;
+      transform: translateY(0);
     }
 
     .footer {
@@ -277,15 +272,12 @@
       <p class="kicker">Newcastle 2050: What If?</p>
       <h1>What futures should Newcastle talk about next?</h1>
       <p class="lede">This single-page topic explorer helps people compare potential TEDxNewy salon themes before voting goes live.</p>
-      <p class="hero-note">Public voting demo now live</p>
+      <p class="hero-note">Cast your vote and help shape the conversation</p>
     </div>
   </header>
 
   <main class="topics wrap" aria-label="Topic cards">
     <section class="topics-frame">
-      <div class="vote-summary">
-        <span class="vote-total">Total votes: <strong id="total-votes">0</strong></span>
-      </div>
       <div class="topic-grid">
         <article class="topic" data-topic-id="health-wellbeing">
           <div class="topic-icon" aria-hidden="true">🧠</div>
@@ -294,7 +286,6 @@
             <p>What if Newcastle became Australia’s healthiest city, body and mind? Designing urban environments, community programs and spaces that support physical activity, mental health and genuine belonging.</p>
             <div class="vote-row">
               <button class="vote-btn" type="button">Vote</button>
-              <span class="vote-count">Votes: <strong>0</strong></span>
             </div>
           </div>
         </article>
@@ -306,7 +297,6 @@
             <p>What if every suburb felt alive with nature and community? Vibrant civic spaces, biodiversity, tree canopy and ecological corridors woven into the fabric of the city.</p>
             <div class="vote-row">
               <button class="vote-btn" type="button">Vote</button>
-              <span class="vote-count">Votes: <strong>0</strong></span>
             </div>
           </div>
         </article>
@@ -318,7 +308,6 @@
             <p>What if getting around Newcastle was seamless, sustainable and car-light? Public transport, cycling infrastructure and accessibility within the city itself.</p>
             <div class="vote-row">
               <button class="vote-btn" type="button">Vote</button>
-              <span class="vote-count">Votes: <strong>0</strong></span>
             </div>
           </div>
         </article>
@@ -330,7 +319,6 @@
             <p>What if High Speed Rail reshaped Newcastle’s identity and economy? How faster links to Sydney could change housing, work, business and the city’s independence.</p>
             <div class="vote-row">
               <button class="vote-btn" type="button">Vote</button>
-              <span class="vote-count">Votes: <strong>0</strong></span>
             </div>
           </div>
         </article>
@@ -342,7 +330,6 @@
             <p>What if digital tools strengthened local democracy? Using technology to increase transparency, participation and smarter decision-making.</p>
             <div class="vote-row">
               <button class="vote-btn" type="button">Vote</button>
-              <span class="vote-count">Votes: <strong>0</strong></span>
             </div>
           </div>
         </article>
@@ -354,7 +341,6 @@
             <p>What if Newcastle had a thriving, safe and creative night-time life? Reimagining evening culture, live music, hospitality and community safety.</p>
             <div class="vote-row">
               <button class="vote-btn" type="button">Vote</button>
-              <span class="vote-count">Votes: <strong>0</strong></span>
             </div>
           </div>
         </article>
@@ -366,7 +352,6 @@
             <p>What if everyone in Newcastle felt genuinely seen? Systems and environments that support diversity, accessibility and equity across all communities.</p>
             <div class="vote-row">
               <button class="vote-btn" type="button">Vote</button>
-              <span class="vote-count">Votes: <strong>0</strong></span>
             </div>
           </div>
         </article>
@@ -378,7 +363,6 @@
             <p>What if young people actively designed Newcastle’s future? Empowering youth voice in planning, innovation, culture and civic decision-making.</p>
             <div class="vote-row">
               <button class="vote-btn" type="button">Vote</button>
-              <span class="vote-count">Votes: <strong>0</strong></span>
             </div>
           </div>
         </article>
@@ -390,7 +374,6 @@
             <p>What if learning extended far beyond formal institutions? Flexible, lifelong education ecosystems linked to community and industry.</p>
             <div class="vote-row">
               <button class="vote-btn" type="button">Vote</button>
-              <span class="vote-count">Votes: <strong>0</strong></span>
             </div>
           </div>
         </article>
@@ -402,7 +385,6 @@
             <p>What if work in Newcastle looked completely different in 2050? Automation, remote work, creative industries and how employment structures might evolve.</p>
             <div class="vote-row">
               <button class="vote-btn" type="button">Vote</button>
-              <span class="vote-count">Votes: <strong>0</strong></span>
             </div>
           </div>
         </article>
@@ -413,25 +395,18 @@
   <footer class="footer wrap">
     <span class="footer-card">TEDxNewy Salon Topic Explorer</span>
   </footer>
+  <div class="vote-toast" id="vote-toast" role="status" aria-live="polite">Thanks for voting!</div>
   <script>
-    async function refreshCounts() {
-      const response = await fetch("/api/results");
-      if (!response.ok) {
-        throw new Error("Failed to load vote counts.");
-      }
-
-      const data = await response.json();
-      const countsById = new Map(data.results.map((r) => [r.id, r.voteCount]));
-
-      document.querySelectorAll(".topic[data-topic-id]").forEach((card) => {
-        const topicId = card.dataset.topicId;
-        const count = countsById.get(topicId) || 0;
-        const countNode = card.querySelector(".vote-count strong");
-        if (countNode) countNode.textContent = String(count);
-      });
-
-      const totalNode = document.getElementById("total-votes");
-      if (totalNode) totalNode.textContent = String(data.totalVotes || 0);
+    let toastTimer;
+    function showToast(message) {
+      const toast = document.getElementById("vote-toast");
+      if (!toast) return;
+      toast.textContent = message;
+      toast.classList.add("show");
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => {
+        toast.classList.remove("show");
+      }, 1500);
     }
 
     async function voteFor(topicId, button) {
@@ -450,8 +425,8 @@
           throw new Error("Vote failed.");
         }
 
-        await refreshCounts();
-        button.textContent = "Voted!";
+        button.textContent = "Submitted";
+        showToast("Thanks for voting!");
         setTimeout(() => {
           button.textContent = "Vote";
         }, 900);
@@ -474,10 +449,6 @@
         if (!card) return;
         voteFor(card.dataset.topicId, button);
       });
-    });
-
-    refreshCounts().catch((error) => {
-      console.error(error);
     });
   </script>
 </body>
