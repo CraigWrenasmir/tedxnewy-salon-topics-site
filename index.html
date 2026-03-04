@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TEDxNewy Salon | Topic Explorer</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;800;900&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --tedx-red: #eb2800;
+      --black: #000;
+      --white: #fff;
+      --paper: #f7f7f7;
+      --radius-lg: 26px;
+      --radius-md: 20px;
+      --border-bold: 3px solid var(--black);
+      --max: 1120px;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
+      color: var(--black);
+      background: var(--paper);
+      line-height: 1.45;
+    }
+
+    .wrap {
+      width: min(100% - 2rem, var(--max));
+      margin-inline: auto;
+    }
+
+    .hero {
+      background: var(--tedx-red);
+      border-bottom: var(--border-bold);
+      padding: 2rem 0 2.5rem;
+    }
+
+    .brand {
+      display: inline-block;
+      background: #0a0a0a;
+      border: var(--border-bold);
+      border-radius: 16px;
+      padding: 0.45rem 0.7rem;
+      max-width: min(100%, 760px);
+      margin-bottom: 1.25rem;
+    }
+
+    .brand img {
+      display: block;
+      width: 100%;
+      height: auto;
+    }
+
+    .kicker {
+      display: inline-block;
+      margin: 0;
+      background: var(--black);
+      color: var(--white);
+      border: var(--border-bold);
+      border-radius: 16px;
+      padding: 0.55rem 1rem;
+      font-size: clamp(1rem, 2.4vw, 1.25rem);
+      font-weight: 900;
+      text-transform: none;
+      letter-spacing: 0.01em;
+    }
+
+    h1 {
+      margin: 1rem 0 0.75rem;
+      max-width: 19ch;
+      font-size: clamp(2rem, 5vw, 3.9rem);
+      line-height: 0.98;
+      color: var(--white);
+      font-weight: 900;
+      text-transform: uppercase;
+      letter-spacing: -0.02em;
+    }
+
+    .lede {
+      max-width: 70ch;
+      margin: 0;
+      color: var(--white);
+      font-size: clamp(1rem, 2.2vw, 1.15rem);
+      font-weight: 500;
+    }
+
+    .hero-note {
+      display: inline-block;
+      margin: 1rem 0 0;
+      background: var(--black);
+      color: var(--white);
+      border: var(--border-bold);
+      border-radius: 999px;
+      padding: 0.45rem 0.9rem;
+      font-size: 0.82rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    .topics {
+      padding: 2rem 0 3rem;
+    }
+
+    .topics-frame {
+      background: var(--white);
+      border: var(--border-bold);
+      border-radius: var(--radius-lg);
+      padding: 1rem;
+    }
+
+    .topic-grid {
+      display: grid;
+      grid-template-columns: repeat(12, minmax(0, 1fr));
+      gap: 0.85rem;
+    }
+
+    .topic {
+      grid-column: span 6;
+      border: var(--border-bold);
+      border-radius: var(--radius-md);
+      background: var(--white);
+      padding: 1rem;
+      display: grid;
+      grid-template-columns: auto 1fr;
+      gap: 0.8rem;
+      align-items: start;
+      transition: transform 150ms ease;
+    }
+
+    .topic:hover {
+      transform: translateY(-2px);
+    }
+
+    .topic-icon {
+      width: 2.8rem;
+      height: 2.8rem;
+      border-radius: 12px;
+      border: var(--border-bold);
+      display: grid;
+      place-items: center;
+      font-size: 1.25rem;
+      line-height: 1;
+      background: var(--tedx-red);
+    }
+
+    .topic h2 {
+      margin: 0;
+      font-size: 1.07rem;
+      line-height: 1.2;
+      text-transform: uppercase;
+      letter-spacing: 0.01em;
+      font-weight: 800;
+    }
+
+    .topic p {
+      margin: 0.5rem 0 0;
+      font-size: 0.95rem;
+      color: #101010;
+    }
+
+    .vote-row {
+      margin-top: 0.8rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.75rem;
+      flex-wrap: wrap;
+    }
+
+    .vote-btn {
+      border: var(--border-bold);
+      background: var(--black);
+      color: var(--white);
+      font: inherit;
+      font-size: 0.88rem;
+      font-weight: 800;
+      border-radius: 999px;
+      padding: 0.35rem 0.8rem;
+      cursor: pointer;
+      text-transform: uppercase;
+      letter-spacing: 0.02em;
+    }
+
+    .vote-btn:hover {
+      background: var(--tedx-red);
+    }
+
+    .vote-btn:disabled {
+      opacity: 0.7;
+      cursor: wait;
+    }
+
+    .vote-count {
+      border: 2px solid var(--black);
+      border-radius: 999px;
+      padding: 0.15rem 0.55rem;
+      font-size: 0.8rem;
+      font-weight: 700;
+      background: #f2f2f2;
+      white-space: nowrap;
+    }
+
+    .vote-summary {
+      margin: 0 0 0.9rem;
+      display: flex;
+      justify-content: flex-end;
+    }
+
+    .vote-total {
+      border: var(--border-bold);
+      border-radius: 999px;
+      background: var(--black);
+      color: var(--white);
+      padding: 0.3rem 0.75rem;
+      font-size: 0.8rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+    }
+
+    .footer {
+      padding: 0 0 2.2rem;
+    }
+
+    .footer-card {
+      background: var(--black);
+      color: var(--white);
+      border: var(--border-bold);
+      border-radius: 999px;
+      padding: 0.5rem 0.9rem;
+      display: inline-block;
+      font-weight: 700;
+      font-size: 0.84rem;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    @media (max-width: 930px) {
+      .topic {
+        grid-column: span 12;
+      }
+    }
+
+    @media (max-width: 640px) {
+      .wrap {
+        width: min(100% - 1rem, var(--max));
+      }
+      .hero {
+        padding-top: 1.2rem;
+      }
+      .topics-frame {
+        padding: 0.7rem;
+      }
+      .topic {
+        border-radius: 16px;
+      }
+      .topic h2 {
+        font-size: 1rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header class="hero">
+    <div class="wrap">
+      <div class="brand" aria-label="TEDxNewy Salon">
+        <img src="./assets/tedxnewy-salon-logo.png" alt="TEDxNewy Salon logo">
+      </div>
+      <p class="kicker">Newcastle 2050: What If?</p>
+      <h1>What futures should Newcastle talk about next?</h1>
+      <p class="lede">This single-page topic explorer helps people compare potential TEDxNewy salon themes before voting goes live.</p>
+      <p class="hero-note">Public voting demo now live</p>
+    </div>
+  </header>
+
+  <main class="topics wrap" aria-label="Topic cards">
+    <section class="topics-frame">
+      <div class="vote-summary">
+        <span class="vote-total">Total votes: <strong id="total-votes">0</strong></span>
+      </div>
+      <div class="topic-grid">
+        <article class="topic" data-topic-id="health-wellbeing">
+          <div class="topic-icon" aria-hidden="true">🧠</div>
+          <div>
+            <h2>Health &amp; Wellbeing</h2>
+            <p>What if Newcastle became Australia’s healthiest city, body and mind? Designing urban environments, community programs and spaces that support physical activity, mental health and genuine belonging.</p>
+            <div class="vote-row">
+              <button class="vote-btn" type="button">Vote</button>
+              <span class="vote-count">Votes: <strong>0</strong></span>
+            </div>
+          </div>
+        </article>
+
+        <article class="topic" data-topic-id="public-spaces-green-city">
+          <div class="topic-icon" aria-hidden="true">🌿</div>
+          <div>
+            <h2>Public Spaces &amp; Green City</h2>
+            <p>What if every suburb felt alive with nature and community? Vibrant civic spaces, biodiversity, tree canopy and ecological corridors woven into the fabric of the city.</p>
+            <div class="vote-row">
+              <button class="vote-btn" type="button">Vote</button>
+              <span class="vote-count">Votes: <strong>0</strong></span>
+            </div>
+          </div>
+        </article>
+
+        <article class="topic" data-topic-id="transport-mobility">
+          <div class="topic-icon" aria-hidden="true">🚲</div>
+          <div>
+            <h2>Transport &amp; Mobility</h2>
+            <p>What if getting around Newcastle was seamless, sustainable and car-light? Public transport, cycling infrastructure and accessibility within the city itself.</p>
+            <div class="vote-row">
+              <button class="vote-btn" type="button">Vote</button>
+              <span class="vote-count">Votes: <strong>0</strong></span>
+            </div>
+          </div>
+        </article>
+
+        <article class="topic" data-topic-id="high-speed-rail-connectivity">
+          <div class="topic-icon" aria-hidden="true">🚄</div>
+          <div>
+            <h2>High Speed Rail &amp; Connectivity</h2>
+            <p>What if High Speed Rail reshaped Newcastle’s identity and economy? How faster links to Sydney could change housing, work, business and the city’s independence.</p>
+            <div class="vote-row">
+              <button class="vote-btn" type="button">Vote</button>
+              <span class="vote-count">Votes: <strong>0</strong></span>
+            </div>
+          </div>
+        </article>
+
+        <article class="topic" data-topic-id="technology-ai-civic-life">
+          <div class="topic-icon" aria-hidden="true">🤖</div>
+          <div>
+            <h2>Technology &amp; AI in Civic Life</h2>
+            <p>What if digital tools strengthened local democracy? Using technology to increase transparency, participation and smarter decision-making.</p>
+            <div class="vote-row">
+              <button class="vote-btn" type="button">Vote</button>
+              <span class="vote-count">Votes: <strong>0</strong></span>
+            </div>
+          </div>
+        </article>
+
+        <article class="topic" data-topic-id="night-time-economy-culture">
+          <div class="topic-icon" aria-hidden="true">🎶</div>
+          <div>
+            <h2>Night-Time Economy &amp; Culture</h2>
+            <p>What if Newcastle had a thriving, safe and creative night-time life? Reimagining evening culture, live music, hospitality and community safety.</p>
+            <div class="vote-row">
+              <button class="vote-btn" type="button">Vote</button>
+              <span class="vote-count">Votes: <strong>0</strong></span>
+            </div>
+          </div>
+        </article>
+
+        <article class="topic" data-topic-id="inclusion-belonging">
+          <div class="topic-icon" aria-hidden="true">🤝</div>
+          <div>
+            <h2>Inclusion &amp; Belonging</h2>
+            <p>What if everyone in Newcastle felt genuinely seen? Systems and environments that support diversity, accessibility and equity across all communities.</p>
+            <div class="vote-row">
+              <button class="vote-btn" type="button">Vote</button>
+              <span class="vote-count">Votes: <strong>0</strong></span>
+            </div>
+          </div>
+        </article>
+
+        <article class="topic" data-topic-id="youth-futures">
+          <div class="topic-icon" aria-hidden="true">🚀</div>
+          <div>
+            <h2>Youth Futures</h2>
+            <p>What if young people actively designed Newcastle’s future? Empowering youth voice in planning, innovation, culture and civic decision-making.</p>
+            <div class="vote-row">
+              <button class="vote-btn" type="button">Vote</button>
+              <span class="vote-count">Votes: <strong>0</strong></span>
+            </div>
+          </div>
+        </article>
+
+        <article class="topic" data-topic-id="education-lifelong-learning">
+          <div class="topic-icon" aria-hidden="true">📚</div>
+          <div>
+            <h2>Education &amp; Lifelong Learning</h2>
+            <p>What if learning extended far beyond formal institutions? Flexible, lifelong education ecosystems linked to community and industry.</p>
+            <div class="vote-row">
+              <button class="vote-btn" type="button">Vote</button>
+              <span class="vote-count">Votes: <strong>0</strong></span>
+            </div>
+          </div>
+        </article>
+
+        <article class="topic" data-topic-id="work-automation">
+          <div class="topic-icon" aria-hidden="true">⚙️</div>
+          <div>
+            <h2>Work &amp; Automation</h2>
+            <p>What if work in Newcastle looked completely different in 2050? Automation, remote work, creative industries and how employment structures might evolve.</p>
+            <div class="vote-row">
+              <button class="vote-btn" type="button">Vote</button>
+              <span class="vote-count">Votes: <strong>0</strong></span>
+            </div>
+          </div>
+        </article>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer wrap">
+    <span class="footer-card">TEDxNewy Salon Topic Explorer</span>
+  </footer>
+  <script>
+    async function refreshCounts() {
+      const response = await fetch("/api/results");
+      if (!response.ok) {
+        throw new Error("Failed to load vote counts.");
+      }
+
+      const data = await response.json();
+      const countsById = new Map(data.results.map((r) => [r.id, r.voteCount]));
+
+      document.querySelectorAll(".topic[data-topic-id]").forEach((card) => {
+        const topicId = card.dataset.topicId;
+        const count = countsById.get(topicId) || 0;
+        const countNode = card.querySelector(".vote-count strong");
+        if (countNode) countNode.textContent = String(count);
+      });
+
+      const totalNode = document.getElementById("total-votes");
+      if (totalNode) totalNode.textContent = String(data.totalVotes || 0);
+    }
+
+    async function voteFor(topicId, button) {
+      button.disabled = true;
+      const originalText = button.textContent;
+      button.textContent = "Voting...";
+
+      try {
+        const response = await fetch("/api/vote", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ topicId }),
+        });
+
+        if (!response.ok) {
+          throw new Error("Vote failed.");
+        }
+
+        await refreshCounts();
+        button.textContent = "Voted!";
+        setTimeout(() => {
+          button.textContent = "Vote";
+        }, 900);
+      } catch (error) {
+        console.error(error);
+        button.textContent = "Try Again";
+      } finally {
+        setTimeout(() => {
+          button.disabled = false;
+          if (button.textContent === "Try Again") {
+            button.textContent = originalText;
+          }
+        }, 500);
+      }
+    }
+
+    document.querySelectorAll(".topic[data-topic-id] .vote-btn").forEach((button) => {
+      button.addEventListener("click", () => {
+        const card = button.closest(".topic[data-topic-id]");
+        if (!card) return;
+        voteFor(card.dataset.topicId, button);
+      });
+    });
+
+    refreshCounts().catch((error) => {
+      console.error(error);
+    });
+  </script>
+</body>
+</html>
