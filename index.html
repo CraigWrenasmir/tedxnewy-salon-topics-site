@@ -290,7 +290,7 @@
       <p class="lede">Newcastle is growing and changing fast. On April 30, we will gather together at the Q Building, Honeysuckle, to talk about what we want our city to look like in 2050.</p>
       <p class="lede">But first - you get to choose what we talk about.</p>
       <p class="lede">Below are 10 possible futures for Newcastle. Vote for the ideas most important to you. The three topics with the most votes become the breakout conversations on the night. Voting closes 19 March.</p>
-      <p class="hero-note">👇 Select up to 5 topics that matter most to you.</p>
+      <p class="hero-note">👇 Select up to 3 topics that matter most to you.</p>
     </div>
   </header>
 
@@ -417,7 +417,7 @@
 
   <div class="vote-toast" id="vote-toast" role="status" aria-live="polite">Thanks for voting!</div>
   <script>
-    const MAX_SELECTIONS = 5;
+    const MAX_SELECTIONS = 3;
     const STORAGE_KEY = "tedxnewy_selected_topics_v1";
     const selectedTopics = new Set(JSON.parse(sessionStorage.getItem(STORAGE_KEY) || "[]"));
     const LOCAL_VOTES_KEY = "tedxnewy_local_votes_v1";
