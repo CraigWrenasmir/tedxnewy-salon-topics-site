@@ -60,16 +60,17 @@
 
     .kicker {
       display: inline-block;
-      margin: 0;
+      margin: 0 0 0.7rem;
       background: var(--black);
       color: var(--white);
       border: var(--border-bold);
-      border-radius: 16px;
-      padding: 0.55rem 1rem;
-      font-size: clamp(1rem, 2.4vw, 1.25rem);
+      border-radius: 18px;
+      padding: 0.5rem 1rem 0.58rem;
+      font-size: clamp(2rem, 6vw, 4.25rem);
       font-weight: 900;
       text-transform: none;
-      letter-spacing: 0.01em;
+      letter-spacing: -0.02em;
+      line-height: 1;
     }
 
     h1 {
@@ -84,10 +85,10 @@
     }
 
     .lede {
-      max-width: 70ch;
-      margin: 0;
+      max-width: 82ch;
+      margin: 0.35rem 0 0;
       color: var(--white);
-      font-size: clamp(1rem, 2.2vw, 1.15rem);
+      font-size: clamp(1rem, 2.2vw, 1.08rem);
       font-weight: 500;
     }
 
@@ -99,10 +100,8 @@
       border: var(--border-bold);
       border-radius: 999px;
       padding: 0.45rem 0.9rem;
-      font-size: 0.82rem;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.04em;
+      font-size: 0.92rem;
+      font-weight: 800;
     }
 
     .topics {
@@ -193,6 +192,11 @@
       background: var(--tedx-red);
     }
 
+    .vote-btn.is-selected {
+      background: var(--tedx-red);
+      color: var(--white);
+    }
+
     .vote-btn:disabled {
       opacity: 0.7;
       cursor: wait;
@@ -219,6 +223,47 @@
     .vote-toast.show {
       opacity: 1;
       transform: translateY(0);
+    }
+
+    .vote-confirm {
+      margin: 1rem 0 0;
+      border: var(--border-bold);
+      border-radius: 18px;
+      background: #ffe3dd;
+      padding: 0.85rem 0.9rem;
+    }
+
+    .vote-confirm h3 {
+      margin: 0 0 0.35rem;
+      font-size: 1.06rem;
+      line-height: 1.2;
+      font-weight: 900;
+    }
+
+    .vote-confirm p {
+      margin: 0 0 0.55rem;
+      font-size: 0.95rem;
+      font-weight: 600;
+    }
+
+    .vote-confirm a {
+      display: inline-block;
+      border: var(--border-bold);
+      border-radius: 999px;
+      background: var(--black);
+      color: var(--white);
+      text-decoration: none;
+      padding: 0.35rem 0.7rem;
+      font-size: 0.86rem;
+      font-weight: 800;
+    }
+
+    .vote-confirm a:hover {
+      background: var(--tedx-red);
+    }
+
+    .hidden {
+      display: none !important;
     }
 
     .footer {
@@ -271,8 +316,10 @@
       </div>
       <p class="kicker">Newcastle 2050: What If?</p>
       <h1>What futures should Newcastle talk about next?</h1>
-      <p class="lede">This single-page topic explorer helps people compare potential TEDxNewy salon themes before voting goes live.</p>
-      <p class="hero-note">Cast your vote and help shape the conversation</p>
+      <p class="lede">Newcastle is growing and changing fast. On April 30, we will gather together at the Q Building, Honeysuckle, to talk about what we want our city to look like in 2050.</p>
+      <p class="lede">But first - you get to choose what we talk about.</p>
+      <p class="lede">Below are 10 possible futures for Newcastle. Vote for the ideas most important to you. The three topics with the most votes become the breakout conversations on the night. Voting closes 19 March.</p>
+      <p class="hero-note">👇 Select up to 5 topics that matter most to you.</p>
     </div>
   </header>
 
@@ -389,6 +436,11 @@
           </div>
         </article>
       </div>
+      <section class="vote-confirm hidden" id="vote-confirm" aria-live="polite">
+        <h3>Your vote's in — thank you! 🙌</h3>
+        <p>Tickets go on sale to our mailing list first on 23 March.</p>
+        <a href="https://tedxcookshill.com.au/" target="_blank" rel="noopener noreferrer">Join the mailing list →</a>
+      </section>
     </section>
   </main>
 
@@ -397,6 +449,10 @@
   </footer>
   <div class="vote-toast" id="vote-toast" role="status" aria-live="polite">Thanks for voting!</div>
   <script>
+    const MAX_SELECTIONS = 5;
+    const STORAGE_KEY = "tedxnewy_selected_topics_v1";
+    const selectedTopics = new Set(JSON.parse(sessionStorage.getItem(STORAGE_KEY) || "[]"));
+
     let toastTimer;
     function showToast(message) {
       const toast = document.getElementById("vote-toast");
@@ -409,7 +465,38 @@
       }, 1500);
     }
 
+    function persistSelection() {
+      sessionStorage.setItem(STORAGE_KEY, JSON.stringify(Array.from(selectedTopics)));
+    }
+
+    function updateButtonsState() {
+      const atLimit = selectedTopics.size >= MAX_SELECTIONS;
+      document.querySelectorAll(".topic[data-topic-id] .vote-btn").forEach((button) => {
+        const card = button.closest(".topic[data-topic-id]");
+        const topicId = card ? card.dataset.topicId : "";
+        const isSelected = selectedTopics.has(topicId);
+        button.classList.toggle("is-selected", isSelected);
+        button.textContent = isSelected ? "Selected" : "Vote";
+        button.disabled = !isSelected && atLimit;
+      });
+    }
+
+    function showVoteConfirmation() {
+      const panel = document.getElementById("vote-confirm");
+      if (panel) panel.classList.remove("hidden");
+    }
+
     async function voteFor(topicId, button) {
+      if (selectedTopics.has(topicId)) {
+        return;
+      }
+
+      if (selectedTopics.size >= MAX_SELECTIONS) {
+        showToast("You've already selected 5 topics.");
+        updateButtonsState();
+        return;
+      }
+
       button.disabled = true;
       const originalText = button.textContent;
       button.textContent = "Voting...";
@@ -425,17 +512,19 @@
           throw new Error("Vote failed.");
         }
 
-        button.textContent = "Submitted";
+        selectedTopics.add(topicId);
+        persistSelection();
+        showVoteConfirmation();
         showToast("Thanks for voting!");
-        setTimeout(() => {
-          button.textContent = "Vote";
-        }, 900);
+        updateButtonsState();
       } catch (error) {
         console.error(error);
         button.textContent = "Try Again";
       } finally {
         setTimeout(() => {
-          button.disabled = false;
+          if (!selectedTopics.has(topicId)) {
+            button.disabled = false;
+          }
           if (button.textContent === "Try Again") {
             button.textContent = originalText;
           }
@@ -450,6 +539,11 @@
         voteFor(card.dataset.topicId, button);
       });
     });
+
+    if (selectedTopics.size > 0) {
+      showVoteConfirmation();
+    }
+    updateButtonsState();
   </script>
 </body>
 </html>
