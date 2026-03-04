@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TEDxNewy Internal Results</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --red: #eb2800;
+      --black: #000;
+      --white: #fff;
+      --paper: #f7f7f7;
+      --border: 3px solid var(--black);
+      --radius: 22px;
+      --max: 980px;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
+      background: var(--paper);
+      color: var(--black);
+    }
+
+    .top {
+      background: var(--red);
+      border-bottom: var(--border);
+      padding: 1.2rem 0;
+    }
+
+    .wrap {
+      width: min(100% - 2rem, var(--max));
+      margin-inline: auto;
+    }
+
+    h1 {
+      margin: 0;
+      color: var(--white);
+      font-size: clamp(1.6rem, 4.4vw, 2.6rem);
+      line-height: 1;
+      text-transform: uppercase;
+      font-weight: 900;
+      letter-spacing: -0.02em;
+    }
+
+    .subtitle {
+      margin: 0.55rem 0 0;
+      color: var(--white);
+      font-weight: 600;
+    }
+
+    .panel {
+      margin: 1.2rem auto 2rem;
+      background: var(--white);
+      border: var(--border);
+      border-radius: var(--radius);
+      padding: 1rem;
+    }
+
+    .meta {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.8rem;
+      flex-wrap: wrap;
+      margin-bottom: 0.8rem;
+    }
+
+    .total {
+      border: var(--border);
+      border-radius: 999px;
+      background: var(--black);
+      color: var(--white);
+      padding: 0.35rem 0.75rem;
+      font-size: 0.84rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+    }
+
+    .refresh {
+      border: var(--border);
+      border-radius: 999px;
+      background: var(--white);
+      color: var(--black);
+      font: inherit;
+      font-size: 0.84rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+      padding: 0.35rem 0.75rem;
+      cursor: pointer;
+    }
+
+    .refresh:hover {
+      background: var(--red);
+      color: var(--white);
+    }
+
+    .table-wrap {
+      overflow-x: auto;
+      border: var(--border);
+      border-radius: 16px;
+      background: var(--white);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 520px;
+    }
+
+    th,
+    td {
+      padding: 0.7rem 0.75rem;
+      text-align: left;
+      border-bottom: 2px solid #e5e5e5;
+      font-size: 0.94rem;
+    }
+
+    thead th {
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+      font-size: 0.78rem;
+      background: #f3f3f3;
+      font-weight: 800;
+    }
+
+    tbody tr:first-child {
+      background: #ffe6df;
+    }
+
+    tbody tr:last-child td {
+      border-bottom: 0;
+    }
+
+    .rank {
+      font-weight: 800;
+      width: 4.8rem;
+    }
+
+    .votes {
+      font-weight: 800;
+    }
+
+    .status {
+      margin-top: 0.75rem;
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: #333;
+    }
+  </style>
+</head>
+<body>
+  <header class="top">
+    <div class="wrap">
+      <h1>Internal Voting Results</h1>
+      <p class="subtitle">TEDxNewy Salon · Newcastle 2050</p>
+    </div>
+  </header>
+
+  <main class="wrap panel">
+    <div class="meta">
+      <span class="total">Total votes: <strong id="total-votes">0</strong></span>
+      <button type="button" class="refresh" id="refresh-btn">Refresh</button>
+    </div>
+
+    <div class="table-wrap">
+      <table aria-label="Vote results">
+        <thead>
+          <tr>
+            <th>Rank</th>
+            <th>Topic</th>
+            <th>Votes</th>
+          </tr>
+        </thead>
+        <tbody id="results-body"></tbody>
+      </table>
+    </div>
+
+    <p class="status" id="status">Loading results...</p>
+  </main>
+
+  <script>
+    async function loadResults() {
+      const status = document.getElementById("status");
+      status.textContent = "Loading results...";
+
+      try {
+        const response = await fetch("/api/results");
+        if (!response.ok) {
+          throw new Error("Could not load results");
+        }
+
+        const data = await response.json();
+        const tbody = document.getElementById("results-body");
+        tbody.innerHTML = "";
+
+        data.results.forEach((row, index) => {
+          const tr = document.createElement("tr");
+          tr.innerHTML = `
+            <td class="rank">#${index + 1}</td>
+            <td>${row.emoji} ${row.title}</td>
+            <td class="votes">${row.voteCount}</td>
+          `;
+          tbody.appendChild(tr);
+        });
+
+        document.getElementById("total-votes").textContent = String(data.totalVotes || 0);
+        status.textContent = `Updated ${new Date().toLocaleTimeString()}`;
+      } catch (error) {
+        console.error(error);
+        status.textContent = "Could not load results. Try refresh.";
+      }
+    }
+
+    document.getElementById("refresh-btn").addEventListener("click", loadResults);
+    loadResults();
+    setInterval(loadResults, 15000);
+  </script>
+</body>
+</html>

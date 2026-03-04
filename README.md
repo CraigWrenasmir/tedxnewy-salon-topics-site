@@ -11,6 +11,10 @@ npm start
 
 Open `http://localhost:3000`.
 
+Internal results dashboard:
+
+- `http://localhost:3000/internal-results.html`
+
 ## API
 
 - `GET /api/topics` - topic list with vote counts
