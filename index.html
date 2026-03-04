@@ -73,17 +73,6 @@
       line-height: 1;
     }
 
-    h1 {
-      margin: 1rem 0 0.75rem;
-      max-width: 19ch;
-      font-size: clamp(2rem, 5vw, 3.9rem);
-      line-height: 0.98;
-      color: var(--white);
-      font-weight: 900;
-      text-transform: uppercase;
-      letter-spacing: -0.02em;
-    }
-
     .lede {
       max-width: 82ch;
       margin: 0.35rem 0 0;
@@ -315,7 +304,6 @@
         <img src="./assets/tedxnewy-salon-logo.png" alt="TEDxNewy Salon logo">
       </div>
       <p class="kicker">Newcastle 2050: What If?</p>
-      <h1>What futures should Newcastle talk about next?</h1>
       <p class="lede">Newcastle is growing and changing fast. On April 30, we will gather together at the Q Building, Honeysuckle, to talk about what we want our city to look like in 2050.</p>
       <p class="lede">But first - you get to choose what we talk about.</p>
       <p class="lede">Below are 10 possible futures for Newcastle. Vote for the ideas most important to you. The three topics with the most votes become the breakout conversations on the night. Voting closes 19 March.</p>
@@ -452,6 +440,7 @@
     const MAX_SELECTIONS = 5;
     const STORAGE_KEY = "tedxnewy_selected_topics_v1";
     const selectedTopics = new Set(JSON.parse(sessionStorage.getItem(STORAGE_KEY) || "[]"));
+    const LOCAL_VOTES_KEY = "tedxnewy_local_votes_v1";
 
     let toastTimer;
     function showToast(message) {
@@ -502,14 +491,23 @@
       button.textContent = "Voting...";
 
       try {
-        const response = await fetch("/api/vote", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ topicId }),
-        });
+        let apiVoteOk = false;
+        try {
+          const response = await fetch("/api/vote", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ topicId }),
+          });
+          apiVoteOk = response.ok;
+        } catch (apiError) {
+          apiVoteOk = false;
+        }
 
-        if (!response.ok) {
-          throw new Error("Vote failed.");
+        // Fallback for static hosting (GitHub Pages): preserve vote locally
+        if (!apiVoteOk) {
+          const localVotes = JSON.parse(localStorage.getItem(LOCAL_VOTES_KEY) || "[]");
+          localVotes.push({ topicId, at: new Date().toISOString() });
+          localStorage.setItem(LOCAL_VOTES_KEY, JSON.stringify(localVotes));
         }
 
         selectedTopics.add(topicId);
@@ -519,15 +517,13 @@
         updateButtonsState();
       } catch (error) {
         console.error(error);
-        button.textContent = "Try Again";
+        showToast("Sorry, something went wrong.");
       } finally {
         setTimeout(() => {
           if (!selectedTopics.has(topicId)) {
             button.disabled = false;
           }
-          if (button.textContent === "Try Again") {
-            button.textContent = originalText;
-          }
+          if (button.textContent !== "Selected") button.textContent = originalText;
         }, 500);
       }
     }
