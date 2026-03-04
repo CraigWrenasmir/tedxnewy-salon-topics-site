@@ -455,13 +455,59 @@
       if (panel) panel.classList.remove("hidden");
     }
 
+    function hideVoteConfirmation() {
+      const panel = document.getElementById("vote-confirm");
+      if (panel) panel.classList.add("hidden");
+    }
+
+    function syncVoteConfirmation() {
+      if (selectedTopics.size > 0) {
+        showVoteConfirmation();
+      } else {
+        hideVoteConfirmation();
+      }
+    }
+
+    async function unvoteFor(topicId, button) {
+      button.disabled = true;
+      button.textContent = "Updating...";
+
+      try {
+        try {
+          await fetch("/api/unvote", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ topicId }),
+          });
+        } catch (apiError) {
+          // Static-host fallback: ignore backend unvote failures.
+        }
+
+        const localVotes = JSON.parse(localStorage.getItem(LOCAL_VOTES_KEY) || "[]");
+        const idx = localVotes.map((v) => v.topicId).lastIndexOf(topicId);
+        if (idx >= 0) {
+          localVotes.splice(idx, 1);
+          localStorage.setItem(LOCAL_VOTES_KEY, JSON.stringify(localVotes));
+        }
+
+        selectedTopics.delete(topicId);
+        persistSelection();
+        syncVoteConfirmation();
+        updateButtonsState();
+        showToast("Vote removed.");
+      } finally {
+        button.disabled = false;
+      }
+    }
+
     async function voteFor(topicId, button) {
       if (selectedTopics.has(topicId)) {
+        await unvoteFor(topicId, button);
         return;
       }
 
       if (selectedTopics.size >= MAX_SELECTIONS) {
-        showToast("You've already selected 5 topics.");
+        showToast(`You've already selected ${MAX_SELECTIONS} topics.`);
         updateButtonsState();
         return;
       }
@@ -492,7 +538,7 @@
 
         selectedTopics.add(topicId);
         persistSelection();
-        showVoteConfirmation();
+        syncVoteConfirmation();
         showToast("Thanks for voting!");
         updateButtonsState();
       } catch (error) {
@@ -516,9 +562,7 @@
       });
     });
 
-    if (selectedTopics.size > 0) {
-      showVoteConfirmation();
-    }
+    syncVoteConfirmation();
     updateButtonsState();
   </script>
 </body>
