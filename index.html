@@ -251,63 +251,6 @@
       background: var(--tedx-red);
     }
 
-    .signup-form {
-      margin-top: 0.6rem;
-      display: flex;
-      flex-wrap: wrap;
-      gap: 0.5rem;
-      align-items: end;
-    }
-
-    .signup-field {
-      display: flex;
-      flex-direction: column;
-      gap: 0.25rem;
-      flex: 1 1 180px;
-    }
-
-    .signup-field label {
-      font-size: 0.78rem;
-      font-weight: 800;
-      text-transform: uppercase;
-      letter-spacing: 0.03em;
-    }
-
-    .signup-field input {
-      border: var(--border-bold);
-      border-radius: 12px;
-      padding: 0.5rem 0.7rem;
-      font: inherit;
-      font-size: 0.92rem;
-      background: var(--white);
-      outline: none;
-    }
-
-    .signup-field input:focus {
-      border-color: var(--tedx-red);
-      box-shadow: 0 0 0 2px rgba(235, 40, 0, 0.15);
-    }
-
-    .signup-submit {
-      border: var(--border-bold);
-      background: var(--tedx-red);
-      color: var(--white);
-      font: inherit;
-      font-size: 0.9rem;
-      font-weight: 800;
-      border-radius: 999px;
-      padding: 0.5rem 1.2rem;
-      cursor: pointer;
-      text-transform: uppercase;
-      letter-spacing: 0.02em;
-      white-space: nowrap;
-      align-self: end;
-    }
-
-    .signup-submit:hover {
-      background: var(--black);
-    }
-
     .hidden {
       display: none !important;
     }
@@ -467,23 +410,7 @@
       <section class="vote-confirm hidden" id="vote-confirm" aria-live="polite">
         <h3>Your vote's in — thank you! 🙌</h3>
         <p>Tickets go on sale to our mailing list first on 23 March.</p>
-        <h3 style="margin-top:0.5rem;">Join the TEDxNewy Community</h3>
-        <form action="https://tedxcookshill.us17.list-manage.com/subscribe/post?u=a10d6888da44faff18e178ba6&amp;id=d1beff871c&amp;f_id=002f4be0f0" method="post" class="signup-form" target="_blank">
-          <div class="signup-field">
-            <label for="mce-EMAIL">Email *</label>
-            <input type="email" name="EMAIL" id="mce-EMAIL" required placeholder="you@example.com">
-          </div>
-          <div class="signup-field">
-            <label for="mce-FNAME">First Name</label>
-            <input type="text" name="FNAME" id="mce-FNAME" placeholder="First">
-          </div>
-          <div class="signup-field">
-            <label for="mce-LNAME">Last Name</label>
-            <input type="text" name="LNAME" id="mce-LNAME" placeholder="Last">
-          </div>
-          <div aria-hidden="true" style="position:absolute;left:-5000px;"><input type="text" name="b_a10d6888da44faff18e178ba6_d1beff871c" tabindex="-1" value=""></div>
-          <button type="submit" class="signup-submit">Subscribe →</button>
-        </form>
+        <a href="https://tedxcookshill.com.au/" target="_blank" rel="noopener noreferrer">Join the mailing list →</a>
       </section>
     </section>
   </main>
